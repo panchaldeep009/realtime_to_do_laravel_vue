@@ -6,45 +6,28 @@ use App\ToDoUsers;
 
 use Illuminate\Http\Request;
 use Validator;    
-
 class ToDoUserController extends Controller
 {
     /// (GET)/users
     public function getUsers(){
         return response()->json([
             "status" => 200,
-            "tasks" => ToDoUsers::all(),
+            "users" => ToDoUsers::all(),
         ]);
     }
     
-    /// (POST)/get_user
+    /// (GET)/user
     public function getUser(Request $request){
-
-        $validator = Validator::make($request->all(), [
-            "csrf_token" => "required",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => 400,
-                "error" => $validator->errors(),
-            ]);
-        }
-        
-        
-        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->csrf_token);
-
+        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF"));
         if($thisUser->exists()){
-
             return response()->json([
                 "status" => 200,
                 "user" => $thisUser->first(),
             ]);
-
         } else {
             return response()->json([
                 "status" => 200,
-                "error" => "User not find",
+                "error" => "User not found",
             ]);
         }
 
@@ -55,7 +38,6 @@ class ToDoUserController extends Controller
 
         $validator = Validator::make($request->all(), [
             "user_name" => "required|max:255",
-            "csrf_token" => "required",
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -66,7 +48,7 @@ class ToDoUserController extends Controller
 
         $newUser = new ToDoUsers;
         $newUser->to_do_user_name = $request->user_name;
-        $newUser->to_do_user_csrf = $request->csrf_token;
+        $newUser->to_do_user_csrf = $request->header("X-CSRF");
         $newUser->save();
 
         return response()->json([
@@ -77,18 +59,8 @@ class ToDoUserController extends Controller
 
     /// (DELETE)/user
     public function deleteUser(Request $request){
-        $validator = Validator::make($request->all(), [
-            "csrf_token" => "required",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => 400,
-                "error" => $validator->errors(),
-            ]);
-        }
         
-        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->csrf_token);
+        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF"));
 
         if($thisUser->exists()){
 

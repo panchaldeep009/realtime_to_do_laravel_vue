@@ -5,20 +5,25 @@ namespace App\Http\Controllers;
 use App\ToDoUsers;
 
 use Illuminate\Http\Request;
-use Validator;    
+use Validator;
+use Illuminate\Support\Carbon;
+
 class ToDoUserController extends Controller
 {
     /// (GET)/users
-    public function getUsers(){
+    public function getUsers(Request $request){
+        $allUsers = ToDoUsers::select('to_do_user_name', 'updated_at');
+        $thisUser = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", $request->header("X-CSRF"));
         return response()->json([
             "status" => 200,
-            "users" => ToDoUsers::all(),
+            "users" => $allUsers->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get(),
+            "this_user" => $thisUser->exists() ? $thisUser->first() : false
         ]);
     }
     
     /// (GET)/user
     public function getUser(Request $request){
-        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF"));
+        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF")) ;
         if($thisUser->exists()){
             return response()->json([
                 "status" => 200,
@@ -74,6 +79,15 @@ class ToDoUserController extends Controller
                 "status" => 200,
                 "error" => "User not find",
             ]);
+        }
+    }
+    /// (DELETE)/keepOnline
+    public function keepOnline(Request $request){
+        
+        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF"));
+
+        if($thisUser->exists()){
+            $thisUser->update(["updated_at" => Carbon::now()]);
         }
     }
 }

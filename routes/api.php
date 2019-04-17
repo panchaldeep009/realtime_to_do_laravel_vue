@@ -22,3 +22,4 @@ Route::get('/users', 'ToDoUserController@getUsers');
 Route::get('/user', 'ToDoUserController@getUser');
 Route::post('/user', 'ToDoUserController@createUser');
 Route::delete('/user', 'ToDoUserController@deleteUser');
+Route::get('/keepOnline', 'ToDoUserController@keepOnline');

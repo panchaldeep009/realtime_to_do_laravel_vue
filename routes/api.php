@@ -19,6 +19,6 @@ Route::post('/task', 'ToDoController@postTask');
 Route::delete('/task', 'ToDoController@deleteTask');
 
 Route::get('/users', 'ToDoUserController@getUsers');
-Route::post('/get_user', 'ToDoUserController@getUser');
+Route::get('/user', 'ToDoUserController@getUser');
 Route::post('/user', 'ToDoUserController@createUser');
 Route::delete('/user', 'ToDoUserController@deleteUser');

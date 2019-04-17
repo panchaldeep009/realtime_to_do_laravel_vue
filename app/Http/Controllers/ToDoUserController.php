@@ -12,11 +12,20 @@ class ToDoUserController extends Controller
 {
     /// (GET)/users
     public function getUsers(Request $request){
-        $allUsers = ToDoUsers::select('to_do_user_name', 'updated_at');
+        $allUsers = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get();
         $thisUser = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", $request->header("X-CSRF"));
         return response()->json([
             "status" => 200,
-            "users" => $allUsers->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get(),
+            "users" => 
+
+            /// Mapping Online status of Each Users
+            array_map(function ($user){
+                $last_update_time = new Carbon($user['updated_at']);
+                $diff = $last_update_time->diffInSeconds(Carbon::now());
+                $user['online'] = $diff < 10;
+                return $user;
+            }, json_decode(json_encode($allUsers), True)),
+
             "this_user" => $thisUser->exists() ? $thisUser->first() : false
         ]);
     }

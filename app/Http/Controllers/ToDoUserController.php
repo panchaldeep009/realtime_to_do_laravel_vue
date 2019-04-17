@@ -14,6 +14,12 @@ class ToDoUserController extends Controller
     public function getUsers(Request $request){
         $allUsers = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get();
         $thisUser = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", $request->header("X-CSRF"));
+        
+        // To Keep Current user Online 
+        if($thisUser->exists()){
+            $thisUser->update(["updated_at" => Carbon::now()]);
+        }
+
         return response()->json([
             "status" => 200,
             "users" => 
@@ -28,6 +34,7 @@ class ToDoUserController extends Controller
 
             "this_user" => $thisUser->exists() ? $thisUser->first() : false
         ]);
+        
     }
     
     /// (GET)/user
@@ -88,15 +95,6 @@ class ToDoUserController extends Controller
                 "status" => 200,
                 "error" => "User not find",
             ]);
-        }
-    }
-    /// (DELETE)/keepOnline
-    public function keepOnline(Request $request){
-        
-        $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF"));
-
-        if($thisUser->exists()){
-            $thisUser->update(["updated_at" => Carbon::now()]);
         }
     }
 }

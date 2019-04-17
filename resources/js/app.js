@@ -4,7 +4,7 @@ import App from "./App.vue";
 new Vue({
     el: "#app",
     data: {
-        user: false,
+        user: true,
         users: [],
         UserRefresh: null
     },
@@ -34,17 +34,11 @@ new Vue({
                 }, 
                 ({error}) => this.errors.fetchUser = error);
         },
-        KeepMeOnline(){
-            this.fetchJSON("/api/keepOnline");
-        }
     },
     mounted() {
         // V 1.0 Http Request Real-time
         this.UserRefresh = setInterval(() => {
             this.fetchUser();
-            if(this.user){
-                this.KeepMeOnline()
-            }
         }, 1200);
 
         // V 2.0 Websocket Event

@@ -16,7 +16,7 @@ class CreateToDoTable extends Migration
         Schema::create('to_do', function (Blueprint $table) {
             $table->bigIncrements('to_do_id');
             $table->string('to_do_task');
-            $table->string('to_do_user_id');
+            $table->integer('to_do_user_id');
             $table->timestamps();
         });
     }

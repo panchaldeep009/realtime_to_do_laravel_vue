@@ -1,0 +1,173 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+GRAY='\033[1;30m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;36m'
+WHITE='\033[1;37m'
+
+PrintLogo () {
+    printf "${BLUE}  ::: TO DO TASK APP :::  \n"
+}
+endNOW () {
+    printf "${WHITE} \n "
+    exit 1
+}
+exitNow () {
+    printf "${WHITE} \n "
+    exit 0
+}
+
+CheckVersion () {
+    printf "${YELLOW} Checking Version of $2 ... \n"
+    printf "${BLUE} ____________________________\n"
+    printf "${GRAY}"
+    if eval $1 >&- 2>&- ; then
+        printf "${YELLOW} ------------\n"
+        printf "${GREEN} $2 Found \n"
+        printf "${YELLOW} ------------\n"
+    else
+        printf "${RED} 
+        ------------\n
+        $2 not found \n
+        ------------\n"
+        endNOW
+    fi
+}
+
+CheckRun () {
+    printf "${YELLOW} $2 \n"
+    if eval $1 >&- 2>&- ; then
+        printf "${BLUE} ------------ ${WHITE}\n"
+    else
+        printf "${RED} ------------\n
+         Unsuccessful attempt : \n
+        ${BLUE} '$1' ${RED}
+        ------------\n"
+        endNOW
+    fi
+}
+
+configApp () {
+    CheckVersion "php --version" "PHP"
+    CheckVersion "composer --version" "Composer"
+    CheckVersion "npm --version" "NPM (Node Package Mangement)"
+
+    CheckRun "composer update" "Updating Composer ..."
+    CheckRun "npm install" "Installing Node dependencies ..."
+    CheckRun "cp .env.example .env" "Creating Laravel Environment File ..."
+    CheckRun "php artisan key:generate" "Generating Key ..."
+    CheckRun "npm run production" "Deploying Front-end Application ..."
+}
+
+Help() {
+    printf "${BLUE} Options ${WHITE} : ${YELLOW} Job \n\n"
+    printf "${BLUE}      --app ${WHITE} : ${YELLOW} To config Application Environment \n"
+    printf "${BLUE}      --sql ${WHITE} : ${YELLOW} To config MySQL Connetion \n"
+    printf "${BLUE}      --run ${WHITE} : ${YELLOW} To Run App Server \n"
+    printf "${BLUE}      -r ${WHITE} : ${YELLOW} To Run App Server \n"
+    printf "${BLUE}      --watch ${WHITE} : ${YELLOW} To keep Front-end Bundling \n"
+    printf "${BLUE}      -w ${WHITE} : ${YELLOW} To keep Front-end Bundling \n"
+    printf "${BLUE}      --build ${WHITE} : ${YELLOW} To build Front-end production Version \n"
+    printf "${BLUE}      -p ${WHITE} : ${YELLOW} To build Front-end production Version \n"
+    printf "\n"
+    printf "${BLUE}      -h ${WHITE} : ${YELLOW} To Discover Command Options \n"
+    printf "${BLUE}      --help ${WHITE} : ${YELLOW} To Discover Command Options \n"
+}
+
+Intro() {
+    printf "${YELLOW} Welcome to Parking Lot App Config \n\n"
+    printf "${WHITE} Use command option ${BLUE} -h ${WHITE} or ${BLUE} --help ${WHITE} to Discover more Command Options \n"
+}
+
+MySQL() {
+    printf "${YELLOW} Enter Hosted MySQL server details, ${BLUE} (<Default_Value>) \n\n"
+
+    defaultValue='localhost'
+    printf "${BLUE} HOST Name ${WHITE} ($defaultValue) : ${YELLOW}"
+    read value
+    if test -z "$value"; then
+        value="$defaultValue"
+    fi
+    eval "sed -i 's/DB_HOST=\(.*\)/DB_HOST=$value/g' .env"
+
+    defaultValue='3306'
+    printf "${BLUE} PORT Number ${WHITE} ($defaultValue) : ${YELLOW}"
+    read value
+    if test -z "$value"; then
+        value="$defaultValue"
+    fi
+    eval "sed -i 's/DB_PORT=\(.*\)/DB_PORT=$value/g' .env"
+
+    defaultValue='db_to_do_task'
+    printf "${BLUE} Database Name ${WHITE} ($defaultValue) : ${YELLOW}"
+    read value
+    if test -z "$value"; then
+        value="$defaultValue"
+    fi
+    eval "sed -i 's/DB_DATABASE=\(.*\)/DB_DATABASE=$value/g' .env"
+    
+    defaultValue='root'
+    printf "${BLUE} User Name ${WHITE} ($defaultValue) : ${YELLOW}"
+    read value
+    if test -z "$value"; then
+        value="$defaultValue"
+    fi
+    eval "sed -i 's/DB_USERNAME=\(.*\)/DB_USERNAME=$value/g' .env"
+    
+    defaultValue=''
+    printf "${BLUE} Password ${WHITE} ($defaultValue) : ${YELLOW}"
+    read value
+    if test -z "$value"; then
+        value="$defaultValue"
+    fi
+    eval "sed -i 's/DB_PASSWORD=\(.*\)/DB_PASSWORD=$value/g' .env"
+
+    CheckRun "php artisan migrate:fresh" "Creating MySQL Tables"
+    printf "\n ${YELLOW} :: DATABASE Configed Successfully ::"
+}
+
+PrintLogo
+
+if test "$1" = "--app"; then
+    configApp
+elif test "$1" = "--help"; then
+    Help
+elif test "$1" = "--sql"; then
+    MySQL
+elif test "$1" = "-h"; then
+    Help
+elif test "$1" = "--run"; then
+    printf "${YELLOW} :: ... Running Back-end Server ... :: \n\n"
+    php artisan serve
+    printf "${GREEN} :: Server Running END :: \n\n"
+elif test "$1" = "-r"; then
+    printf "${YELLOW} :: ... Running Back-end Server ... :: \n\n"
+    php artisan serve
+    printf "${GREEN} :: Server Running END :: \n\n"
+elif test "$1" = "--watch"; then
+    printf "${YELLOW} :: ... Watching Front-end Development ... :: \n\n"
+    npm run watch >&- 2>&- 
+    printf "${GREEN} :: Watching END :: \n\n"
+elif test "$1" = "-w"; then
+    printf "${YELLOW} :: ... Watching Front-end Development ... :: \n\n"
+    npm run watch >&- 2>&- 
+    printf "${GREEN} :: Watching END :: \n\n"
+elif test "$1" = "--build"; then
+    printf "${YELLOW} :: Building Front-end App :: \n\n"
+    npm run prod >&- 2>&- 
+    printf "${GREEN} :: DONE :: \n\n"
+elif test "$1" = "-p"; then
+    printf "${YELLOW} :: Building Front-end App :: \n\n"
+    npm run prod >&- 2>&- 
+    printf "${GREEN} :: DONE :: \n\n"
+elif test "$1" = "--test"; then
+    printf "${YELLOW} :: Running test for $2 :: \n\n"
+    vendor/bin/phpunit $2
+    printf "${GREEN} :: DONE :: \n\n"
+else
+    Intro
+fi
+
+exitNow

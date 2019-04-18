@@ -12,8 +12,8 @@ class ToDoUserController extends Controller
 {
     /// (GET)/users
     public function getUsers(Request $request){
-        $allUsers = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get();
-        $thisUser = ToDoUsers::select('to_do_user_name', 'updated_at')->where("to_do_user_csrf", $request->header("X-CSRF"));
+        $allUsers = ToDoUsers::select('to_do_user_id', 'to_do_user_name', 'updated_at')->where("to_do_user_csrf", "!=" , $request->header("X-CSRF"))->get();
+        $thisUser = ToDoUsers::select('to_do_user_id', 'to_do_user_name', 'updated_at')->where("to_do_user_csrf", $request->header("X-CSRF"));
         
         // To Keep Current user Online 
         if($thisUser->exists()){
@@ -21,19 +21,18 @@ class ToDoUserController extends Controller
         }
 
         return response()->json([
-            "status" => 200,
             "users" => 
 
             /// Mapping Online status of Each Users
             array_map(function ($user){
                 $last_update_time = new Carbon($user['updated_at']);
                 $diff = $last_update_time->diffInSeconds(Carbon::now());
-                $user['online'] = $diff < 10;
+                $user['online'] = $diff < 3;
                 return $user;
             }, json_decode(json_encode($allUsers), True)),
 
             "this_user" => $thisUser->exists() ? $thisUser->first() : false
-        ]);
+        ], 200);
         
     }
     
@@ -42,14 +41,12 @@ class ToDoUserController extends Controller
         $thisUser = ToDoUsers::where("to_do_user_csrf", $request->header("X-CSRF")) ;
         if($thisUser->exists()){
             return response()->json([
-                "status" => 200,
                 "user" => $thisUser->first(),
-            ]);
+            ], 200);
         } else {
             return response()->json([
-                "status" => 200,
                 "error" => "User not found",
-            ]);
+            ], 404);
         }
 
     }
@@ -62,7 +59,6 @@ class ToDoUserController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                "status" => 400,
                 "error" => $validator->errors(),
             ], 400);
         }
@@ -73,9 +69,8 @@ class ToDoUserController extends Controller
         $newUser->save();
 
         return response()->json([
-            "status" => 200,
             "message" => "Task added successfully",
-        ]);
+        ], 200);
     }
 
     /// (DELETE)/user
@@ -87,14 +82,12 @@ class ToDoUserController extends Controller
 
             $thisUser->delete();
             return response()->json([
-                "status" => 200,
                 "message" => "User Deleted successfully",
-            ]);
+            ], 200);
         } else {
             return response()->json([
-                "status" => 200,
                 "error" => "User not find",
-            ]);
+            ], 404);
         }
     }
 }

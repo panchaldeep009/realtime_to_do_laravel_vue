@@ -1,5 +1,5 @@
 # TO DO Real-time V 1.0
-This is a To Do Task list CRUD Real-time Application.
+This is a To Do Task list CRUD Real-time Application. In this app a user can create, read, edit and delete to do task and can see real-time changes of other user in to do task.
 
 ### V 1.0
    In this version app has real-time data refresh by calling HTTP requests in fix time interval.

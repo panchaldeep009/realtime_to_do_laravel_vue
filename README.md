@@ -1,5 +1,12 @@
-# TO DO Real-time
-This is a CRUD To Do Task list Application.
+# TO DO Real-time V 1.0
+This is a To Do Task list CRUD Real-time Application.
+
+### V 1.0
+   In this version app has real-time data refresh by calling HTTP requests in fix time interval.
+### V 2.0
+   Next version would have real-time data refresh by websocket and Laravel broadcasting events. 
+### V 3.0
+   In version 3.0 app would have a benchmark of comparing both versions' way of refreshing data. 
 
 ## Setup
 Following instructions will give a copy of this This Application up and running in any local machine for testing purposes.

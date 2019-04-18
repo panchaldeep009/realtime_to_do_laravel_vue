@@ -16,6 +16,8 @@
     </div>
 </template>
 <script>
+import axios from 'axios';
+
 export default {
     name: 'RegisterUser',
     data() {
@@ -26,15 +28,18 @@ export default {
     },
     methods: {
         registerUser(){
-            const formData = new FormData();
-            formData.append('user_name', this.user_name);
-            this.$root.fetchJSON('/api/user', ()=>{}, 
-                (error)=> this.error = error.error.user_name[0] ? error.error.user_name[0] : '', 
-                {
-                    body : formData,
-                    method: "POST"
-                })
+            axios.post('/api/user', {
+                user_name: this.user_name},
+                { headers: { "X-CSRF": window.Laravel.csrfToken } })
+            .then((response) => {
+                if(response.status == 200){
+                    this.error = "";
+                } else {
+                    this.error = response.data.error;
+                }
+            });
         }
+        
     },
 }
 </script>
